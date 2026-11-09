@@ -76,6 +76,7 @@ export type LearnerEventKind =
   | "question"
   | "dismiss"
   | "too_easy"
+  | "too_hard"
   | "helpful"
   | "recall_answer"
   | "step_done"
@@ -121,7 +122,7 @@ export const Intervention = z.object({
   reveal: z
     .string()
     .nullable()
-    .describe("the full fix or answer (exact code or wording), hidden until the learner asks for it twice; null if body already gives nothing away"),
+    .describe("the full fix or answer (exact code or wording), hidden until the learner asks for it twice; required whenever the card asks the learner to write or change code; null only for cards that ask for no work (e.g. a person or a source to read)"),
 });
 export type Intervention = z.infer<typeof Intervention>;
 

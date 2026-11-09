@@ -18,7 +18,7 @@ import {
 } from "./session";
 
 // Which events make the adapter run now, vs. wait to ride along with the next trigger.
-const TRIGGERS: LearnerEventKind[] = ["session_start", "run_ok", "run_error", "stuck", "question", "too_easy", "recall_answer", "step_done"];
+const TRIGGERS: LearnerEventKind[] = ["session_start", "run_ok", "run_error", "stuck", "question", "too_easy", "too_hard", "recall_answer", "step_done"];
 const STUCK_MS = 60_000;
 
 type Props = {
@@ -163,13 +163,13 @@ export function Workspace({ session, setSession, live, model, onNewProject }: Pr
   const ask = (question: string, cellId: string | null) =>
     record({ kind: "question", cellId: cellId ?? undefined, summary: `Asked: "${question}"` });
 
-  const feedback = (interventionId: string, kind: "helpful" | "too_easy" | "dismiss" | "used") => {
+  const feedback = (interventionId: string, kind: "helpful" | "too_easy" | "too_hard" | "dismiss" | "used") => {
     const i = sessionRef.current.interventions.find((x) => x.id === interventionId);
     if (!i) return;
     const status = kind === "dismiss" ? "dismissed" : kind;
     setSession((s) => ({ ...s, interventions: s.interventions.map((x) => (x.id === interventionId ? { ...x, status } : x)) }));
     if (kind === "used") return;
-    const label = { helpful: "Marked helpful", too_easy: "Said too easy", dismiss: "Dismissed" }[kind];
+    const label = { helpful: "Marked helpful", too_easy: "Said too easy", too_hard: "Said too hard", dismiss: "Dismissed" }[kind];
     record({ kind, cellId: i.cellId ?? undefined, summary: `${label}: "${i.title}"` });
   };
 

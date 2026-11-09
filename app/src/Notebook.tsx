@@ -9,7 +9,7 @@ type Props = {
   onEdit: (cellId: string, code: string) => void;
   onAdd: (afterId: string | null) => void;
   onAsk: (q: string, cellId: string | null) => void;
-  onFeedback: (id: string, kind: "helpful" | "too_easy" | "dismiss") => void;
+  onFeedback: (id: string, kind: "helpful" | "too_easy" | "too_hard" | "dismiss") => void;
   onInsertTry: (id: string) => void;
   onReveal: (id: string) => void;
   onMinimize: (id: string, minimized: boolean) => void;
@@ -237,6 +237,7 @@ function InterventionCard({
           </button>
         )}
         <button onClick={() => onFeedback(i.id, "helpful")}>Helpful</button>
+        <button onClick={() => onFeedback(i.id, "too_hard")}>Too hard</button>
         <button onClick={() => onFeedback(i.id, "too_easy")}>Too easy</button>
         <button className="ghost" onClick={() => onFeedback(i.id, "dismiss")}>
           Not now
