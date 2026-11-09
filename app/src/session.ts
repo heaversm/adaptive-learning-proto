@@ -27,7 +27,7 @@ export type Cell = {
 export type ShownIntervention = Intervention & {
   id: string;
   t: number;
-  status: "open" | "helpful" | "too_easy" | "too_hard" | "dismissed" | "used";
+  status: "open" | "helpful" | "too_easy" | "too_hard" | "dismissed" | "used" | "resolved";
   minimized?: boolean;
 };
 

@@ -142,6 +142,11 @@ export function Workspace({ session, setSession, live, model, onNewProject }: Pr
         STUCK_MS,
       );
     } else {
+      // The cell now runs cleanly, so open help about it is out of date: close it.
+      setSession((s) => ({
+        ...s,
+        interventions: s.interventions.map((i) => (i.status === "open" && i.cellId === cellId ? { ...i, status: "resolved" as const } : i)),
+      }));
       const what = [r.images.length ? `${r.images.length} plot(s)` : "", r.html ? "a table" : "", r.text ? "a value" : "", r.stdout ? "printed output" : ""].filter(Boolean).join(", ");
       record({ kind: "run_ok", cellId, code: cell.code, summary: `Ran ${cellId} cleanly${what ? ` → ${what}` : ""}` });
     }
