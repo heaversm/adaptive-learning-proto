@@ -51,6 +51,7 @@ export type LogEntry = {
 export type Batch = { events: LearnerEvent[]; cells: CellSnapshot[] };
 
 export type Session = {
+  id: string; // one save slot per project
   scenario: Scenario;
   profile: Profile;
   datasets: Record<string, string>; // file name -> CSV text (custom projects only; demo fetches from /data)
@@ -78,6 +79,7 @@ export function newCell(id: string, code: string): Cell {
 
 export function newSession(scenario: Scenario, profile: Profile, datasets: Record<string, string> = {}): Session {
   return {
+    id: `${Date.now().toString(36)}-${uid()}`,
     scenario,
     profile,
     datasets,
@@ -193,13 +195,73 @@ export function gradeRecall(s: Session, id: string, correct: boolean): Session {
   };
 }
 
-const KEY = "adaptive-learning-session";
-export const saveSession = (s: Session | null) => (s ? localStorage.setItem(KEY, JSON.stringify(s)) : localStorage.removeItem(KEY));
-export function loadSession(): Session | null {
+// ---------- saving ----------
+// Each project has its own slot, so two tabs or two projects can't overwrite each other.
+const PREFIX = "al-project:";
+const LEGACY_KEY = "adaptive-learning-session"; // the old single slot
+
+export type ProjectMeta = { id: string; title: string; profile: string; updatedAt: number; steps: string };
+
+const metaOf = (s: Session): ProjectMeta => ({
+  id: s.id,
+  title: s.scenario.title,
+  profile: s.profile.name,
+  updatedAt: Date.now(),
+  steps: `${s.completed.length} / ${s.steps.filter((x) => !s.skipped.includes(x.id)).length} steps`,
+});
+
+/** Save a project. Returns a warning to show if the browser refused (usually storage full). */
+export function saveProject(s: Session): string | null {
+  const write = (x: Session) => localStorage.setItem(PREFIX + x.id, JSON.stringify({ meta: metaOf(x), session: x }));
   try {
-    const raw = localStorage.getItem(KEY);
-    return raw ? (JSON.parse(raw) as Session) : null;
+    write(s);
+    return null;
+  } catch {
+    try {
+      // Plots are the bulk of a saved project; drop them and keep everything else.
+      write({ ...s, cells: s.cells.map((c) => ({ ...c, images: [] })) });
+      return "Browser storage is nearly full: this project was saved without its plot images. Re-run cells to redraw them.";
+    } catch {
+      return "This project couldn't be saved: browser storage is full. Delete an old project from the start screen.";
+    }
+  }
+}
+
+export function loadProject(id: string): Session | null {
+  try {
+    const raw = localStorage.getItem(PREFIX + id);
+    return raw ? (JSON.parse(raw).session as Session) : null;
   } catch {
     return null;
+  }
+}
+
+export function listProjects(): ProjectMeta[] {
+  const out: ProjectMeta[] = [];
+  for (let i = 0; i < localStorage.length; i++) {
+    const k = localStorage.key(i);
+    if (!k?.startsWith(PREFIX)) continue;
+    try {
+      out.push(JSON.parse(localStorage.getItem(k)!).meta);
+    } catch {
+      /* skip unreadable entries */
+    }
+  }
+  return out.sort((a, b) => b.updatedAt - a.updatedAt);
+}
+
+export const deleteProject = (id: string) => localStorage.removeItem(PREFIX + id);
+export const projectKey = (id: string) => PREFIX + id;
+
+/** Move a project saved under the old single slot into its own slot. */
+export function migrateLegacy() {
+  const raw = localStorage.getItem(LEGACY_KEY);
+  if (!raw) return;
+  try {
+    const s = JSON.parse(raw) as Session;
+    if (!s.id) s.id = `${Date.now().toString(36)}-${uid()}`;
+    if (!saveProject(s)) localStorage.removeItem(LEGACY_KEY);
+  } catch {
+    /* leave it */
   }
 }

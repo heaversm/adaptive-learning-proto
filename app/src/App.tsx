@@ -1,28 +1,105 @@
 import { useEffect, useState } from "react";
 import { DEMO_PROFILES, DEMO_SCENARIO } from "../shared/demo";
 import { fetchUrl, getConfig, setupCall } from "./api";
-import { loadSession, newSession, saveSession, type Session } from "./session";
+import { deleteProject, listProjects, loadProject, migrateLegacy, newSession, projectKey, saveProject, type ProjectMeta, type Session } from "./session";
 import { Workspace } from "./Workspace";
+
+const hashId = () => new URLSearchParams(location.hash.slice(1)).get("p");
 
 export function App() {
   const [config, setConfig] = useState<{ live: boolean; model: string | null } | null>(null);
-  const [session, setSessionState] = useState<Session | null>(() => loadSession());
+  const [session, setSessionState] = useState<Session | null>(() => {
+    migrateLegacy();
+    const id = hashId();
+    return id ? loadProject(id) : null;
+  });
+  const [saveWarning, setSaveWarning] = useState<string | null>(null);
+  const [changedElsewhere, setChangedElsewhere] = useState(false);
 
   useEffect(() => {
     getConfig().then(setConfig).catch(() => setConfig({ live: false, model: null }));
   }, []);
-  useEffect(() => saveSession(session), [session]);
 
-  if (!config) return <div className="loading">Connecting to the local server…</div>;
+  // Save on every change, and keep this tab's address pointing at its project.
+  useEffect(() => {
+    if (!session) {
+      if (location.hash) history.replaceState(null, "", location.pathname);
+      return;
+    }
+    if (hashId() !== session.id) history.replaceState(null, "", `#p=${session.id}`);
+    setSaveWarning(saveProject(session));
+  }, [session]);
+
+  // Another tab saving the same project: say so instead of silently overwriting each other.
+  useEffect(() => {
+    const onStorage = (e: StorageEvent) => {
+      if (session && e.key === projectKey(session.id)) setChangedElsewhere(true);
+    };
+    window.addEventListener("storage", onStorage);
+    return () => window.removeEventListener("storage", onStorage);
+  }, [session?.id]);
+
+  // Back/forward or a pasted link switches project.
+  useEffect(() => {
+    const onHash = () => {
+      const id = hashId();
+      setSessionState(id ? loadProject(id) : null);
+    };
+    window.addEventListener("hashchange", onHash);
+    return () => window.removeEventListener("hashchange", onHash);
+  }, []);
+
+  if (!config) return <div className="loading">Connecting to the server…</div>;
   if (!session) return <Start live={config.live} onStart={setSessionState} />;
   return (
-    <Workspace
-      session={session}
-      setSession={(fn) => setSessionState((s) => (s ? fn(s) : s))}
-      live={config.live}
-      model={config.model}
-      onNewProject={() => confirm("Leave this project? Its progress will be cleared.") && setSessionState(null)}
-    />
+    <>
+      {(saveWarning || changedElsewhere) && (
+        <div className="save-warning">
+          {changedElsewhere ? "This project was changed in another tab. Reload to see the latest, or keep working here (this tab's version will be saved)." : saveWarning}
+          <button className="x" onClick={() => (setChangedElsewhere(false), setSaveWarning(null))}>
+            ×
+          </button>
+        </div>
+      )}
+      <Workspace
+        key={session.id}
+        session={session}
+        setSession={(fn) => setSessionState((s) => (s ? fn(s) : s))}
+        live={config.live}
+        model={config.model}
+        onNewProject={() => setSessionState(null)}
+      />
+    </>
+  );
+}
+
+function SavedProjects({ onStart }: { onStart: (s: Session) => void }) {
+  const [list, setList] = useState<ProjectMeta[]>(() => listProjects());
+  if (list.length === 0) return null;
+  return (
+    <section className="card saved">
+      <div className="eyebrow">YOUR PROJECTS · saved in this browser</div>
+      {list.map((p) => (
+        <div key={p.id} className="saved-row">
+          <button className="profile" onClick={() => { const s = loadProject(p.id); if (s) onStart(s); }}>
+            <b>{p.title}</b>
+            <span>
+              {p.profile} · {p.steps} · last worked on {new Date(p.updatedAt).toLocaleString()}
+            </span>
+          </button>
+          <button
+            className="ghost"
+            onClick={() => {
+              if (!confirm(`Delete "${p.title}"? This can't be undone.`)) return;
+              deleteProject(p.id);
+              setList(listProjects());
+            }}
+          >
+            Delete
+          </button>
+        </div>
+      ))}
+    </section>
   );
 }
 
@@ -40,6 +117,8 @@ function Start({ live, onStart }: { live: boolean; onStart: (s: Session) => void
           Mock mode: the server is returning canned, rule-based responses. Restart it with <code>LIVE=1</code> to use Claude.
         </div>
       )}
+
+      <SavedProjects onStart={onStart} />
 
       <div className="start-cols">
         <section className="card">

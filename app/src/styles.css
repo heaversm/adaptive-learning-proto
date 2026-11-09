@@ -213,3 +213,10 @@ label > input, label > textarea { margin-top: 4px; }
 .quiet-toggle input { width: auto; margin: 0; }
 .log-summary { font-weight: 600; margin: 2px 0; }
 .log-entry .log-trigger { font-weight: 400; color: var(--muted); font-size: 11px; }
+
+.save-warning { position: sticky; top: 0; z-index: 20; display: flex; justify-content: space-between; align-items: center; gap: 12px; background: #fff6e3; border-bottom: 1px solid #f0d9a6; padding: 8px 20px; font-size: 13px; }
+.save-warning .x { border: 0; background: none; font-size: 16px; color: var(--muted); }
+.card.saved { margin-top: 24px; }
+.saved-row { display: flex; gap: 8px; align-items: stretch; }
+.saved-row .profile { flex: 1; }
+.saved-row .ghost { margin-bottom: 8px; }

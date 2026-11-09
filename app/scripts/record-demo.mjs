@@ -42,7 +42,13 @@ async function caption(text) {
   }, text);
 }
 
-const logCount = () => page.evaluate(() => JSON.parse(localStorage.getItem("adaptive-learning-session") || "{}").log?.length ?? 0);
+const currentSession = () =>
+  page.evaluate(() => {
+    const id = new URLSearchParams(location.hash.slice(1)).get("p");
+    const raw = id && localStorage.getItem("al-project:" + id);
+    return raw ? JSON.parse(raw).session : null;
+  });
+const logCount = async () => (await currentSession())?.log?.length ?? 0;
 async function waitForAdapt(before, label) {
   const start = Date.now();
   while ((await logCount()) <= before) {
@@ -50,10 +56,8 @@ async function waitForAdapt(before, label) {
     await page.waitForTimeout(400);
   }
   await page.waitForFunction(() => !document.querySelector(".headline.pending"), null, { timeout: 120_000 });
-  const latest = await page.evaluate(() => {
-    const s = JSON.parse(localStorage.getItem("adaptive-learning-session"));
-    return s.log[s.log.length - 1];
-  });
+  const s = await currentSession();
+  const latest = s.log[s.log.length - 1];
   notes.push(`        → ${latest.summary || "(no summary — nothing worth showing)"}${latest.usage ? `  [${(latest.usage.ms / 1000).toFixed(1)}s, ${latest.usage.input} in / ${latest.usage.output} out]` : ""}`);
   if (latest.error) {
     notes.push(`        ✗ ${latest.error}`);
@@ -166,8 +170,8 @@ try {
   console.error(err);
   await shot("failure").catch(() => {});
 } finally {
-  const session = await page.evaluate(() => localStorage.getItem("adaptive-learning-session")).catch(() => null);
-  if (session) fs.writeFileSync(path.join(OUT, "session.json"), session);
+  const session = await currentSession().catch(() => null);
+  if (session) fs.writeFileSync(path.join(OUT, "session.json"), JSON.stringify(session));
   fs.writeFileSync(path.join(OUT, "timeline.txt"), notes.join("\n") + "\n");
   const video = page.video();
   await context.close();
