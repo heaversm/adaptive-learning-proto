@@ -1,0 +1,14 @@
+node_modules/
+app/dist/
+.netlify/
+app/.netlify/
+.DS_Store
+
+# Secrets never go in the repo. Locally the key lives in app/.env; on Netlify, in the site's environment settings.
+.env
+.env.*
+**/.env
+**/.env.*
+
+# Test recordings (videos, screenshots, session dumps). The one worth sharing is media/demo.mp4.
+test-runs/
