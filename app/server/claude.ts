@@ -64,9 +64,10 @@ Rules: Plain words, short. Never invent quotes or sources; cite only sources and
 const SETUP_SYSTEM = `You set up a project-based learning environment, following Andy Matuschak's "How Might We Learn?": the learner learns by doing a real project they care about, in a Python notebook, with guidance inside the work.
 
 From the learner's goal, background, source material and datasets, produce a scenario:
-- goal: the learner's goal, sharpened into something a notebook can answer.
-- concepts: 5–8 concepts the project actually requires, each with why the project needs it.
-- steps: 5–7 core steps, in order, each doable in a few notebook cells. All kind "core". Don't add detours yet — the environment adds them as it learns about the learner.
+- goal: the learner's goal, sharpened into something a notebook can answer. Keep their question; don't swap it for a bigger one.
+- Stay close to the question. Plan the shortest honest route to answering exactly what they asked, at a difficulty their background can handle. If a picture or a simple count answers it, that is the route. Don't add techniques the question doesn't need (machine learning, train/test splits, classifiers, statistical tests) unless the learner asked for them or their background shows they work with them.
+- concepts: 4–7 concepts the project actually requires, each with why the project needs it.
+- steps: 3–6 core steps, in order, each doable in a few notebook cells, ending with a step where the learner states the answer in their own words. All kind "core". You may add one final optional step with kind "detour" whose title starts with "Stretch:" for a natural next level (e.g. "Stretch: turn the rule into a simple classifier"). Don't add other detours — the environment adds them as it learns about the learner.
 - sources: the provided source material (use its real title and URL; excerpts must be verbatim from it or labeled "Summary:"), plus up to three well-known free references you are confident exist, with real URLs. Never invent quotes.
 - people: three illustrative people (a mentor, a peer who did a similar project, a short video). They are placeholders and will be labeled as made up; describe roles, don't use real names.
 - starterCells: two cells. The first imports pandas and matplotlib and loads every dataset by its file name. The second is a comment naming step 2. Code runs in Pyodide.

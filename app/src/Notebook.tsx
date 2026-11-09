@@ -19,6 +19,9 @@ export function Notebook(p: Props) {
   const [focus, setFocus] = useState<string | null>(null);
   const [question, setQuestion] = useState("");
   const open = p.session.interventions.filter((i) => i.status === "open");
+  // The latest change, repeated here because the one-line update at the top is often scrolled out of view.
+  const last = p.session.log[p.session.log.length - 1];
+  const latest = last && (last.summary || last.error) ? last : null;
   const floating = open.filter((i) => !i.cellId || !p.session.cells.some((c) => c.id === i.cellId));
 
   return (
@@ -68,7 +71,16 @@ export function Notebook(p: Props) {
           Ask
         </button>
       </form>
-      {p.adapting && <div className="adapting">Adapting to: {p.adapting}</div>}
+      {p.adapting ? (
+        <div className="adapting">Adapting to: {p.adapting}</div>
+      ) : (
+        latest && (
+          <div key={latest.id} className={`nb-update ${latest.error ? "err" : ""}`}>
+            {latest.error ? "Couldn't update: " : "✓ "}
+            {latest.error ?? latest.summary}
+          </div>
+        )
+      )}
     </section>
   );
 }

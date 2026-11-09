@@ -220,3 +220,6 @@ label > input, label > textarea { margin-top: 4px; }
 .saved-row { display: flex; gap: 8px; align-items: stretch; }
 .saved-row .profile { flex: 1; }
 .saved-row .ghost { margin-bottom: 8px; }
+
+.nb-update { margin-top: 10px; font: 12px var(--mono); color: #8ee0c8; animation: fadein .3s, fadeout 1s 30s forwards; }
+.nb-update.err { color: #f0a59c; }
