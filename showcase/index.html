@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Adaptive Learning</title>
+<link rel="stylesheet" href="showcase.css">
+<style>
+  .try { display: inline-block; margin-top: 18px; background: #2f7d6d; color: #fff; padding: 12px 20px; border-radius: 8px; text-decoration: none; font-weight: 600; }
+  .try:hover { background: #3e9a86; }
+  .note { font-size: 14px; color: #6b7575; margin-top: 10px; }
+  table.compare { border-collapse: collapse; width: 100%; margin: 12px 0 4px; font-size: 15px; }
+  table.compare th, table.compare td { text-align: left; vertical-align: top; padding: 10px 12px; border-bottom: 1px solid #e3e2dc; }
+  table.compare th { font-weight: 600; background: #f5f4ef; }
+</style>
+</head>
+<body>
+<header class="top">
+  <span class="logo">Adaptive Learning</span>
+  <nav><a href="#video">Video</a><a href="#run">A closer look</a><a href="#compare">Two learners</a></nav>
+</header>
+<main>
+  <section class="hero">
+    <h1>A notebook that adapts to how you work, not just to how you answer questions.</h1>
+    <p>You pick a real project and say what you already know. As you write Python, the notebook watches your runs, errors and questions, and changes the path, the hints and the practice to fit you. Based on Andy Matuschak's essay <a href="https://andymatuschak.org/hmwl/">How Might We Learn?</a></p>
+    <a class="try" href="https://adaptive-learning-proto.netlify.app">Try it</a>
+    <p class="note">Runs in your browser. The demo uses real Bonneville Power Administration grid data and Portland temperatures from Nov 2–8, 2026. Model calls are capped per visitor and per day.</p>
+  </section>
+
+  <section id="video" class="video">
+    <video controls playsinline preload="metadata" poster="media/poster.jpg">
+      <source src="media/adaptive-learning.mp4" type="video/mp4">
+      <a href="media/adaptive-learning.mp4">Download the video</a>
+    </video>
+  </section>
+
+  <section id="run" class="run">
+    <h2>A closer look: Priya, a Python developer new to energy data</h2>
+    <div class="carousel" aria-roledescription="carousel">
+      <figure class="slide" data-n="1">
+        <img src="run/00-start.jpg" alt="The workspace before any code: the path on the left includes detours on MW vs MWh, lost peaks and fitted slopes">
+        <figcaption><b>Before any code.</b> The path is shaped from her background: loading the files becomes a quick check because she knows pandas, and short side lessons appear for the energy and statistics ideas she hasn't met.</figcaption>
+      </figure>
+      <figure class="slide" data-n="2" hidden>
+        <img src="run/01-error-hint.jpg" alt="An error on line 2 of cell 2 with a hint card underneath, pinned to that line">
+        <figcaption><b>A hint, not the answer.</b> Her hourly average fails because the timestamps are still text. The hint is pinned to the failing line and points her at the right options. The fix stays behind "Reveal the answer", which asks twice.</figcaption>
+      </figure>
+      <figure class="slide" data-n="3" hidden>
+        <img src="run/03-fixed.jpg" alt="The fixed cell plotting hourly load for the week">
+        <figcaption><b>She fixes it herself.</b> Hourly load for the week. The path marks the step done and the concept levels on the right move up, each with the evidence behind it.</figcaption>
+      </figure>
+      <figure class="slide" data-n="4" hidden>
+        <img src="run/04-too-easy.jpg" alt="The path after 'Too easy': one side lesson crossed out and a harder stretch step added">
+        <figcaption><b>"Too easy."</b> The system backs off: it drops the side lesson on lost peaks and adds a harder stretch question instead.</figcaption>
+      </figure>
+      <figure class="slide" data-n="5" hidden>
+        <img src="run/07-replay.jpg" alt="Two columns comparing Priya's and Marcus's paths, concept levels and help after the same actions">
+        <figcaption><b>Same actions, different learner.</b> Her session replayed as Marcus, a power engineer new to pandas. If the columns matched, the adapting would be cosmetic.</figcaption>
+      </figure>
+      <div class="controls">
+        <button type="button" class="prev" aria-label="Previous">←</button>
+        <span class="count">1 / 5</span>
+        <button type="button" class="next" aria-label="Next">→</button>
+      </div>
+    </div>
+  </section>
+
+  <section id="compare">
+    <h2>Two learners, same actions</h2>
+    <p>From the recorded run: Priya's session, then the same events and notebook contents replayed with Marcus's background.</p>
+    <table class="compare">
+      <tr><th></th><th>Priya · Python developer</th><th>Marcus · power engineer</th></tr>
+      <tr><td>Side lessons added</td><td>MW is a rate, MWh is an amount; what a fitted slope means</td><td>Pandas for an Excel user; checking his downsampling against the hourly mean. Both were later skipped once the notebook showed he didn't need them</td></tr>
+      <tr><td>After "Too easy"</td><td>Stretch: which hourly number should face the cold?</td><td>Stretch: how much peak does each method lose?</td></tr>
+      <tr><td>How MW vs MWh was explained</td><td>"MW is a speed, not a distance"</td><td>"Why mean, not sum"</td></tr>
+    </table>
+    <p class="note">What's still weak: both learners did the same things, so the replay tests background only. The real test is different people working through it in their own way. The "talk to someone" suggestions use made-up people; matching to real people isn't built.</p>
+  </section>
+
+  <p class="more"><a href="https://adaptive-learning-proto.netlify.app">Try it yourself</a></p>
+</main>
+<script src="showcase.js"></script>
+</body>
+</html>
