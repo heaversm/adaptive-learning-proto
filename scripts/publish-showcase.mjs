@@ -48,6 +48,7 @@ const files = walk(dist).map((full) => {
 });
 
 const TITLE = "Adaptive Learning";
+const FOLDER_ID = "yfD2Lb0V0Rg1nyxQW0Rp"; // "FOTW prototypes", with the other prototypes
 const DESCRIPTION = "A Python notebook that watches how you work (runs, errors, questions) and changes the path, the hints and the practice to fit your background. A video, a real run, and a link to try it.";
 
 let id = existsSync(idFile) ? JSON.parse(readFileSync(idFile, "utf8")).id : null;
@@ -57,12 +58,13 @@ if (!id) {
     kind: "site",
     description: DESCRIPTION,
     access: { mode: "link", defaultRole: "commenter" },
+    folderId: FOLDER_ID,
   });
   id = created.id;
   writeFileSync(idFile, JSON.stringify({ id }, null, 2) + "\n");
   console.log(`Created prototype ${id}`);
 } else {
-  await call("PATCH", `/prototypes/${id}`, { title: TITLE, description: DESCRIPTION });
+  await call("PATCH", `/prototypes/${id}`, { title: TITLE, description: DESCRIPTION, folderId: FOLDER_ID });
 }
 
 const started = await call("POST", `/prototypes/${id}/versions`, {
